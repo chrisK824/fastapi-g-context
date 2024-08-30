@@ -35,10 +35,12 @@ class Globals:
         Returns:
             The value of the variable.
         """
-        try:
+        if name in self._vars:
             return self._vars[name].get()
-        except KeyError:
-            raise AttributeError(name)
+
+        raise AttributeError(
+            f"'{name}' variable does not exist in globals, make sure to set it before trying to use it"
+        )
 
     def __setattr__(self, name: str, value: Any) -> None:
         """
@@ -64,10 +66,10 @@ class Globals:
         Returns:
             The value of the variable or the default value.
         """
-        try:
+        if name in self._vars:
             return self._vars[name].get()
-        except KeyError:
-            return default
+
+        return default
 
     def pop(self, name: str, default: Any = None) -> Any:
         """
