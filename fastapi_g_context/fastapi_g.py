@@ -1,6 +1,6 @@
 from contextvars import ContextVar, copy_context
 from starlette.types import ASGIApp, Receive, Scope, Send
-from typing import Dict, Any, Iterator
+from typing import Dict, Any, Iterator, Tuple
 
 
 class Globals:
@@ -118,7 +118,7 @@ class Globals:
         for var in self._vars.values():
             yield var.get()
 
-    def items(self) -> Iterator[tuple[str, Any]]:
+    def items(self) -> Iterator[Tuple[str, Any]]:
         """
         Return an iterator over the variable name-value pairs.
 
