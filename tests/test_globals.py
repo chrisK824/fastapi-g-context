@@ -1,5 +1,5 @@
 import pytest
-from fastapi_g import g
+from fastapi_g_context import g
 
 
 @pytest.fixture(autouse=True)

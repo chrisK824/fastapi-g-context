@@ -1,6 +1,6 @@
 from fastapi.testclient import TestClient
 from fastapi import FastAPI, Depends
-from fastapi_g import GlobalsMiddleware, g
+from fastapi_g_context import GlobalsMiddleware, g
 import asyncio
 
 

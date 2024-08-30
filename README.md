@@ -1,6 +1,6 @@
-# fastapi-g
+# fastapi-g-context
 
-`fastapi_g` is a Python module that provides a simple mechanism for managing global variables with context isolation in `FastAPI` applications. It is designed to ensure that each request operates within its own isolated context, preventing data leakage between requests.
+`fastapi-g-context` is a Python module that provides a simple mechanism for managing global variables with context isolation in `FastAPI` applications. It is designed to ensure that each request operates within its own isolated context, preventing data leakage between requests.
 
 While this behaviour can be achieved in other ways as well, this module tries to mimic the `flask`'s global `g` object, so that `flask` users find it easier to migrate their logic when moving to `FastAPI`.
 
@@ -13,16 +13,16 @@ While this behaviour can be achieved in other ways as well, this module tries to
 
 ## Installation
 
-To install `fastapi_g` simply use pip:
+To install `fastapi-g-context` simply use pip:
 
-`pip install fastapi_g`
+`pip install fastapi-g-context`
 
 
 ## Usage
-To use `fastapi_g` in your FastAPI application, follow these simple steps:
+To use `fastapi-g-context` in your FastAPI application, follow these simple steps:
 
-- Install the package: Ensure you have `fastapi_g` installed. You can add it to your requirements.txt or install it directly.
-- Import the necessary components from `fastapi_g`: 
+- Install the package: Ensure you have `fastapi-g-context` installed. You can add it to your requirements.txt or install it directly.
+- Import the necessary components from `fastapi_g_context`: 
     - `GlobalsMiddleware` 
     - `g` object (the global context manager) .
 - Add the GlobalsMiddleware to your FastAPI application. This middleware ensures that each request operates with a fresh context for global variables.
@@ -31,7 +31,7 @@ To use `fastapi_g` in your FastAPI application, follow these simple steps:
 
 ```python
 from fastapi import FastAPI, Depends
-from fastapi_g import GlobalsMiddleware, g
+from fastapi_g_context import GlobalsMiddleware, g
 
 app = FastAPI()
 app.add_middleware(GlobalsMiddleware)
@@ -117,12 +117,12 @@ _Set the value of an attribute by name. Creates the attribute if it does not alr
 
 ## Example
 
-To demonstrate the capabilities of the fastapi_g module, here's an example FastAPI application.
+To demonstrate the capabilities of the fastapi_g_context module, here's an example FastAPI application.
 
 ```python
 from fastapi import FastAPI, Depends
 from fastapi.responses import JSONResponse
-from fastapi_g import GlobalsMiddleware, g
+from fastapi_g_context import GlobalsMiddleware, g
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -232,7 +232,7 @@ Traceback (most recent call last):
   File "/path/to/example.py", line 53, in info
     logging.info(g.not_existing)
                  ^^^^^^^^^^^^^^
-  File "/path/to/fastapi_g.py", line 41, in __getattr__
+  File "/path/to/fastapi_g_context.py", line 41, in __getattr__
     raise AttributeError(
 AttributeError: 'not_existing' variable does not exist in globals, make sure to set it before trying to use it
 INFO:root:'username' key has value: JohnDoe

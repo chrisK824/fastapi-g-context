@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Depends
 from fastapi.responses import JSONResponse
-from fastapi_g import GlobalsMiddleware, g
+from fastapi_g_context import GlobalsMiddleware, g
 import logging
 
 logging.basicConfig(level=logging.INFO)
