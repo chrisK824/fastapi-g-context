@@ -114,6 +114,14 @@ _Set the value of an attribute by name. Creates the attribute if it does not alr
   - `value` (Any): Value to set for the attribute.
 - **Return Type**: `None`
 
+**‍‍‍`g.set_default(name, value)`**
+_Set the default value of an attribute by name. If the attribute already exists, the existing value is not overwritten._
+
+- **Parameters**:
+  - `name` (str): Name of the attribute to set a default value for.
+  - `value` (Any): Default value to set if the attribute does not already exist.
+- **Return Type**: `None`
+
 
 ## Example
 

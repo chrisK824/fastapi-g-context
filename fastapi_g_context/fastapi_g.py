@@ -1,6 +1,6 @@
 from contextvars import ContextVar, copy_context
 from starlette.types import ASGIApp, Receive, Scope, Send
-from typing import Dict, Any, Iterator, Tuple
+from typing import Dict, Any, Iterator, Optional, Tuple
 
 
 class Globals:
@@ -54,6 +54,16 @@ class Globals:
             self._vars[name] = ContextVar(f"globals:{name}")
 
         self._vars[name].set(value)
+
+    def set_default(self, name: str, value: Any) -> None:
+        """
+        Set a default value for a given variable name in the Globals context.
+
+        Args:
+            name: The name of the variable.
+            value: The value to set.
+        """
+        self.__setattr__(name, value)
 
     def get(self, name: str, default: Any = None) -> Any:
         """
@@ -145,13 +155,14 @@ class GlobalsMiddleware:
     Ensures that each request operates with a fresh context for global variables.
     """
 
-    def __init__(self, app: ASGIApp) -> None:
+    def __init__(self, app: ASGIApp, g_default_values: Optional[Dict] = None) -> None:
         """Initialize the middleware with the ASGI application.
 
         Args:
             app: The ASGI application to wrap.
         """
         self.app = app
+        self.g_default_values = g_default_values or {}
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
         """
@@ -166,6 +177,11 @@ class GlobalsMiddleware:
         """
         # Clear global variables for the request
         g.clear()
+        
+        # Set default values
+        for key, value in self.g_default_values.items():
+            g.set_default(key, value)
+        
         # Create a new context for the request
         ctx = copy_context()
         # Run the original ASGI app in the new context

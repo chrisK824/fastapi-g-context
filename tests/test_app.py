@@ -5,7 +5,10 @@ import asyncio
 
 
 app = FastAPI()
-app.add_middleware(GlobalsMiddleware)
+app.add_middleware(
+    GlobalsMiddleware, 
+    g_default_values={"default_key1": "default_value1"},
+)
 
 
 async def set_globals():
@@ -13,6 +16,7 @@ async def set_globals():
     g.request_id = "123456"
     g.is_admin = True
     g.to_pop = "dispensable"
+    g.default_key1 = "default_value2"
 
 
 @app.get("/set_globals", dependencies=[Depends(set_globals)])
@@ -39,28 +43,28 @@ def test_globals_are_set():
     response = client.get("/set_globals")
     assert response.status_code == 200
     data = response.json()
-    assert set(data["global_keys"]) == {"username", "request_id", "is_admin", "to_pop"}
+    assert set(data["global_keys"]) == {"username", "request_id", "is_admin", "to_pop", "default_key1"}
     assert data["global_dict"]["username"] == "JohnDoe"
     assert data["global_dict"]["request_id"] == "123456"
+    assert data["global_dict"]["default_key1"] == "default_value2"
     assert data["global_dict"]["is_admin"] is True
-
 
 def test_globals_isolation_across_different_endpoints():
     response = client.get("/set_globals")
     assert response.status_code == 200
     data = response.json()
-    assert set(data["global_keys"]) == {"username", "request_id", "is_admin", "to_pop"}
+    assert set(data["global_keys"]) == {"username", "request_id", "is_admin", "to_pop", "default_key1"}
     assert data["global_dict"]["username"] == "JohnDoe"
     assert data["global_dict"]["request_id"] == "123456"
+    assert data["global_dict"]["default_key1"] == "default_value2"
     assert data["global_dict"]["is_admin"] is True
 
     response = client.get("/no_globals")
     assert response.status_code == 200
     data = response.json()
-
-    assert data["global_dict"] == {}
-    assert data["global_keys"] == []
-    assert data["global_values"] == []
+    assert data["global_dict"] == {'default_key1': 'default_value1'}
+    assert data["global_keys"] == ['default_key1']
+    assert data["global_values"] == ['default_value1']
 
 
 def test_globals_isolation_across_different_endpoints_async():
@@ -82,7 +86,7 @@ def test_globals_isolation_across_different_endpoints_async():
         assert response1["global_dict"]["request_id"] == "123456"
         assert response1["global_dict"]["is_admin"] is True
 
-        assert response2["global_dict"] == {}
+        assert response2["global_dict"] == {'default_key1': 'default_value1'}
 
     asyncio.run(main())
 
@@ -110,6 +114,6 @@ def test_concurrent_requests():
             assert response["global_dict"]["is_admin"] is True
 
         for response in [response3, response4]:
-            assert response["global_dict"] == {}
+            assert response["global_dict"] == {'default_key1': 'default_value1'}
 
     asyncio.run(main())

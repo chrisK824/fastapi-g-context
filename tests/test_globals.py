@@ -65,3 +65,9 @@ def test_to_dict():
     g.key1 = "value1"
     g.key2 = "value2"
     assert g.to_dict() == {"key1": "value1", "key2": "value2"}
+
+
+def test_set_default():
+    g.set_default("key1", "value1")
+    g.set_default("key2", "value2")
+    assert g.to_dict() == {"key1": "value1", "key2": "value2"}
