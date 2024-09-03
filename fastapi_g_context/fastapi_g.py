@@ -65,7 +65,7 @@ class Globals:
         """
         self.__setattr__(name, value)
 
-    def get(self, name: str, default: Any = None) -> Any:
+    def get(self, name: str, default: Optional[Any] = None) -> Any:
         """
         Retrieve the value of a variable with an optional default value.
 
@@ -81,7 +81,7 @@ class Globals:
 
         return default
 
-    def pop(self, name: str, default: Any = None) -> Any:
+    def pop(self, name: str, default: Optional[Any] = None) -> Any:
         """
         Retrieve and remove the value of a variable, with an optional default.
 
