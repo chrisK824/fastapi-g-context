@@ -3,6 +3,16 @@ from fastapi import FastAPI, Depends
 from fastapi_g_context import GlobalsMiddleware, g
 import asyncio
 import pytest
+import functools
+
+
+if not hasattr(asyncio, 'to_thread'):
+    async def to_thread(func, *args, **kwargs):
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, functools.partial(func, *args, **kwargs))
+else:
+    to_thread = asyncio.to_thread
+
 
 app = FastAPI()
 app.add_middleware(GlobalsMiddleware)
@@ -13,7 +23,6 @@ async def initialize_global_context():
     g.request_id = "123456"
     g.is_admin = True
     g.to_remove = "dispensable"
-
 
 
 @app.get("/set_globals", dependencies=[Depends(initialize_global_context)])
@@ -147,10 +156,10 @@ async def test_concurrent_requests_with_sleep_delay():
         response = client.get("/no_globals_with_delay")
         return response.json()
 
-    task_1 = asyncio.create_task(asyncio.to_thread(make_request_set_globals_with_delay))
+    task_1 = asyncio.create_task(to_thread(make_request_set_globals_with_delay))
 
     await asyncio.sleep(1)
-    task_2 = asyncio.create_task(asyncio.to_thread(make_request_no_globals_with_delay))
+    task_2 = asyncio.create_task(to_thread(make_request_no_globals_with_delay))
 
     response_1 = await task_1
     response_2 = await task_2

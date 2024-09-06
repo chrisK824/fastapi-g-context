@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="fastapi-g-context",
-    version="0.0.1",
+    version="0.0.2",
     description="fastapi-g-context is a Python module that provides a simple mechanism for managing \
     global variables with context isolation in FastAPI applications. \
         It is designed to ensure that each request operates within its own isolated context, \
@@ -16,7 +16,7 @@ setup(
     install_requires=[
         "starlette"
     ],
-    python_requires=">=3.7",
+    python_requires=">=3.8",
     license="MIT",
     license_files=["LICENSE"],
     classifiers=[
