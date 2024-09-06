@@ -2,7 +2,6 @@ from contextvars import ContextVar, copy_context
 from starlette.types import ASGIApp, Receive, Scope, Send
 from typing import Dict, Any, Iterator, Tuple
 
-
 class Globals:
     """
     A class for managing global variables with context isolation.
@@ -10,17 +9,17 @@ class Globals:
     Provides methods to set, get, and manage variables in a request-specific context.
     """
 
-    __slots__ = ("_vars",)
+    __slots__ = ("_context_data",)
 
-    _vars: Dict[str, ContextVar]
+    _context_data: ContextVar[Dict[str, Any]]
 
     def __init__(self) -> None:
         """Initialize the Globals instance with an empty variable store."""
-        object.__setattr__(self, '_vars', {})
+        object.__setattr__(self, '_context_data', ContextVar("context_data", default={}))
 
     def clear(self) -> None:
         """Clear all context variables from the store."""
-        self._vars.clear()
+        self._context_data.set({})
 
     def __getattr__(self, name: str) -> Any:
         """
@@ -35,12 +34,10 @@ class Globals:
         Returns:
             The value of the variable.
         """
-        if name in self._vars:
-            return self._vars[name].get()
-
-        raise AttributeError(
-            f"'{name}' variable does not exist in globals, make sure to set it before trying to use it"
-        )
+        try:
+            return self._context_data.get()[name]
+        except KeyError:
+            raise AttributeError(f"'{name}' variable does not exist in globals, make sure to set it before trying to use it")
 
     def __setattr__(self, name: str, value: Any) -> None:
         """
@@ -50,10 +47,7 @@ class Globals:
             name: The name of the variable.
             value: The value to set.
         """
-        if name not in self._vars:
-            self._vars[name] = ContextVar(f"globals:{name}")
-
-        self._vars[name].set(value)
+        self._context_data.get()[name] = value
 
     def get(self, name: str, default: Any = None) -> Any:
         """
@@ -66,10 +60,7 @@ class Globals:
         Returns:
             The value of the variable or the default value.
         """
-        if name in self._vars:
-            return self._vars[name].get()
-
-        return default
+        return self._context_data.get().get(name, default)
 
     def pop(self, name: str, default: Any = None) -> Any:
         """
@@ -82,10 +73,7 @@ class Globals:
         Returns:
             The value of the variable or the default value.
         """
-        if name not in self._vars:
-            return default
-        var = self._vars.pop(name)
-        return var.get()
+        return self._context_data.get().pop(name, default)
 
     def __contains__(self, name: str) -> bool:
         """
@@ -97,7 +85,7 @@ class Globals:
         Returns:
             True if the variable exists, False otherwise.
         """
-        return name in self._vars
+        return name in self._context_data.get()
 
     def keys(self) -> Iterator[str]:
         """
@@ -106,7 +94,7 @@ class Globals:
         Returns:
             An iterator over the variable names.
         """
-        return iter(self._vars.keys())
+        return iter(self._context_data.get().keys())
 
     def values(self) -> Iterator[Any]:
         """
@@ -115,8 +103,7 @@ class Globals:
         Returns:
             An iterator over the variable values.
         """
-        for var in self._vars.values():
-            yield var.get()
+        return iter(self._context_data.get().values())
 
     def items(self) -> Iterator[Tuple[str, Any]]:
         """
@@ -125,8 +112,7 @@ class Globals:
         Returns:
             An iterator over tuples containing variable names and values.
         """
-        for name, var in self._vars.items():
-            yield name, var.get()
+        return iter(self._context_data.get().items())
 
     def to_dict(self) -> Dict[str, Any]:
         """
@@ -135,7 +121,7 @@ class Globals:
         Returns:
             A dictionary of variable names and their values.
         """
-        return {name: var.get() for name, var in self._vars.items()}
+        return dict(self._context_data.get())
 
 
 class GlobalsMiddleware:
